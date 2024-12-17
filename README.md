@@ -43,6 +43,7 @@
      * [Post-Processing Filters](#post-processing-filters)
      * [Available Services](#available-services)
      * [Available Actions](#available-actions)
+     * [Efficient intra-process communication](#efficient-intra-process-communication)
      * [Logging](#logging)
   * [Contributing](CONTRIBUTING.md)
   * [License](LICENSE)
