@@ -274,16 +274,34 @@ void RealSenseNodeFactory::init()
         std::cout << "Press <ENTER> key to continue." << std::endl;
         std::cin.get();
 #endif
-        _serial_no = declare_parameter("serial_no", rclcpp::ParameterValue("")).get<rclcpp::PARAMETER_STRING>();
-        _usb_port_id = declare_parameter("usb_port_id", rclcpp::ParameterValue("")).get<rclcpp::PARAMETER_STRING>();
-        _device_type = declare_parameter("device_type", rclcpp::ParameterValue("")).get<rclcpp::PARAMETER_STRING>();
-        _wait_for_device_timeout = declare_parameter("wait_for_device_timeout", rclcpp::ParameterValue(-1.0)).get<rclcpp::PARAMETER_DOUBLE>();
-        _reconnect_timeout = declare_parameter("reconnect_timeout", 6.0);
-
+        if (has_parameter("serial_no"))
+            _serial_no = get_parameter("serial_no").as_string();
+        else
+            _serial_no = declare_parameter("serial_no", rclcpp::ParameterValue("")).get<rclcpp::PARAMETER_STRING>();
+        if (has_parameter("usb_port_id"))
+            _usb_port_id = get_parameter("usb_port_id").as_string();
+        else
+            _usb_port_id = declare_parameter("usb_port_id", rclcpp::ParameterValue("")).get<rclcpp::PARAMETER_STRING>();
+        if (has_parameter("device_type"))
+            _device_type = get_parameter("device_type").as_string();
+        else
+            _device_type = declare_parameter("device_type", rclcpp::ParameterValue("")).get<rclcpp::PARAMETER_STRING>();
+        if (has_parameter("wait_for_device_timeout"))
+            _wait_for_device_timeout = get_parameter("wait_for_device_timeout").as_double();
+        else
+            _wait_for_device_timeout = declare_parameter("wait_for_device_timeout", rclcpp::ParameterValue(-1.0)).get<rclcpp::PARAMETER_DOUBLE>();
+        if (has_parameter("reconnect_timeout"))
+            _reconnect_timeout = get_parameter("reconnect_timeout").as_double();
+        else
+            _reconnect_timeout = declare_parameter("reconnect_timeout", 6.0);
+        RCLCPP_WARN_STREAM(get_logger(), "serial_no: " << _serial_no);
         // A ROS2 hack: until a better way is found to avoid auto convertion of strings containing only digits to integers:
         if (!_serial_no.empty() && _serial_no.front() == '_') _serial_no = _serial_no.substr(1);    // remove '_' prefix
-
-        std::string rosbag_filename(declare_parameter("rosbag_filename", rclcpp::ParameterValue("")).get<rclcpp::PARAMETER_STRING>());
+        std::string rosbag_filename;
+        if (has_parameter("rosbag_filename"))
+            rosbag_filename = get_parameter("rosbag_filename").as_string();
+        else
+            rosbag_filename = declare_parameter("rosbag_filename", rclcpp::ParameterValue("")).get<rclcpp::PARAMETER_STRING>();
         if (!rosbag_filename.empty())
         {
             {
@@ -299,7 +317,10 @@ void RealSenseNodeFactory::init()
         }
         else
         {
-            _initial_reset = declare_parameter("initial_reset", rclcpp::ParameterValue(false)).get<rclcpp::PARAMETER_BOOL>();
+            if (has_parameter("initial_reset"))
+                _initial_reset = get_parameter("initial_reset").as_bool();
+            else
+                _initial_reset = declare_parameter("initial_reset", rclcpp::ParameterValue(false)).get<rclcpp::PARAMETER_BOOL>();
 
             _query_thread = std::thread([=]()
             {

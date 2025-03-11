@@ -118,7 +118,7 @@ find_package(tf2_ros REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(diagnostic_updater REQUIRED)
 find_package(OpenCV REQUIRED COMPONENTS core)
-
+find_package(rclcpp_lifecycle REQUIRED)
 find_package(realsense2 2.56.3)
 if (BUILD_ACCELERATE_GPU_WITH_GLSL)
   find_package(realsense2-gl 2.56.3)
@@ -253,6 +253,7 @@ set(dependencies
   tf2
   tf2_ros
   diagnostic_updater
+  rclcpp_lifecycle
 )
 
 if (BUILD_ACCELERATE_GPU_WITH_GLSL)
@@ -264,6 +265,7 @@ endif()
 ament_target_dependencies(${PROJECT_NAME}
   ${dependencies}
 )
+
 
 rclcpp_components_register_node(${PROJECT_NAME}
   PLUGIN "realsense2_camera::RealSenseNodeFactory"
@@ -294,7 +296,7 @@ install(
 
 # Install launch files
 install(DIRECTORY 
-    launch
+    launch config
     DESTINATION share/${PROJECT_NAME}
     )
 
@@ -384,4 +386,39 @@ ament_export_include_directories(include)
 ament_export_libraries(${PROJECT_NAME})
 ament_export_dependencies(${dependencies})
 
+
+# add_library(${PROJECT_NAME}_lifecycle SHARED
+#     ${INCLUDES}
+#     ${SOURCES}
+# )
+
+add_executable(${PROJECT_NAME}_lifecycle
+  src/main.cpp
+  # src/realsense_node_factory.cpp
+)
+
+target_include_directories(${PROJECT_NAME}
+	PUBLIC
+  include
+)
+target_link_libraries(${PROJECT_NAME}_lifecycle
+    ${link_libraries}
+    ${PROJECT_NAME}
+)
+
+ament_target_dependencies(${PROJECT_NAME}_lifecycle
+  ${dependencies}
+)
+
+# rclcpp_components_register_node(${PROJECT_NAME}_lifecycle
+#   PLUGIN "realsense2_camera::RealsenseLifecycleNode"
+#   EXECUTABLE realsense2_lifecycle_node
+# )
+
+
+
+# Install binaries
+install(TARGETS ${PROJECT_NAME}_lifecycle
+  DESTINATION lib/${PROJECT_NAME}
+)
 ament_package()
